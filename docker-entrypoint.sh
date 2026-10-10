@@ -12,8 +12,8 @@ normalize_database_url() {
   esac
 
   if printf '%s' "$rest" | grep -q '@'; then
-    userinfo="${rest%@*}"
-    host_and_query="${rest##*@}"
+    userinfo="${rest%%@*}"
+    host_and_query="${rest#*@}"
     userinfo=$(printf '%s' "$userinfo" | sed 's/@/%40/g')
     printf '%s%s@%s' "$scheme" "$userinfo" "$host_and_query"
   else
