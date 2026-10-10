@@ -36,6 +36,15 @@ public class User implements UserDetails {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Column(length = 40)
+    private String phone;
+
+    @Column(length = 240)
+    private String address;
+
+    @Column(name = "avatar_url", length = 1000)
+    private String avatarUrl;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)

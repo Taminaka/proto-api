@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -25,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AttractionService attractionService;
+    private final StorageService storageService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -107,6 +109,9 @@ public class AuthService {
     @Transactional
     public UserResponse updateProfile(User user, UpdateProfileRequest request) {
         if (request.fullName() != null) user.setFullName(request.fullName());
+        if (request.phone() != null) user.setPhone(request.phone());
+        if (request.address() != null) user.setAddress(request.address());
+        if (request.avatarUrl() != null) user.setAvatarUrl(request.avatarUrl());
         userRepository.save(user);
         return mapToUserResponse(user);
     }
@@ -118,6 +123,11 @@ public class AuthService {
         }
         user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+    }
+
+    @Transactional
+    public String uploadAvatar(User user, MultipartFile file) {
+        return storageService.upload(file, "users/" + user.getId() + "/avatar").url();
     }
 
     @Transactional
@@ -290,6 +300,7 @@ public class AuthService {
         }
         return new UserResponse(
                 user.getId(), user.getEmail(), user.getFullName(),
+                user.getPhone(), user.getAddress(), user.getAvatarUrl(),
                 user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()),
                 user.getActiveMode().name(), user.getStatus().name(),
                 user.getIsVerified(), opResponse

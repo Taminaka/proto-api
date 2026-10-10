@@ -5,5 +5,6 @@ import lombok.*;
 public record UpdateProfileRequest(
     String fullName,
     String phone,
-    String address
+    String address,
+    String avatarUrl
 ) {}

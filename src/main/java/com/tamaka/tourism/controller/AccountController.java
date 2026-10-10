@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,6 +27,15 @@ public class AccountController {
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateProfile(@AuthenticationPrincipal User user, @Valid @RequestBody UpdateProfileRequest request) {
         return ResponseEntity.ok(authService.updateProfile(user, request));
+    }
+
+    @PostMapping(value = "/me/avatar", consumes = "multipart/form-data")
+    public ResponseEntity<UserResponse> updateAvatar(
+            @AuthenticationPrincipal User user,
+            @RequestPart("file") MultipartFile file
+    ) {
+        String avatarUrl = authService.uploadAvatar(user, file);
+        return ResponseEntity.ok(authService.updateProfile(user, new UpdateProfileRequest(null, null, null, avatarUrl)));
     }
 
     @PutMapping("/me/password")

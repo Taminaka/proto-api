@@ -123,6 +123,17 @@ All demo accounts use the password `Admin123!`:
 | ADMIN_EMAIL | admin@tamaka.com | Admin seed email |
 | ADMIN_PASSWORD | Admin123! | Admin seed password |
 | ADMIN_FULL_NAME | System Administrator | Admin seed full name |
+| R2_ACCOUNT_ID | (empty) | Cloudflare account ID for image storage |
+| R2_ACCESS_KEY_ID | (empty) | R2 access key |
+| R2_SECRET_ACCESS_KEY | (empty) | R2 secret key |
+| R2_BUCKET | (empty) | Shared object storage bucket |
+| R2_ENDPOINT | (empty) | R2 S3-compatible endpoint |
+| R2_PUBLIC_URL | (empty) | Public base URL for uploaded images |
+
+The authenticated `POST /api/storage/upload` endpoint accepts image files up to
+10 MB and returns a public URL. `POST /api/accounts/me/avatar` uses the same
+bucket under `users/{id}/avatar`. In Render, configure the R2 values as secret
+environment variables; do not commit them.
 
 ## API Endpoints
 
