@@ -36,7 +36,7 @@ services:
       - key: R2_SECRET_ACCESS_KEY
         sync: false
       - key: R2_BUCKET
-        sync: false
+        value: vyde-cdn
       - key: R2_ENDPOINT
         sync: false
       - key: R2_PUBLIC_URL

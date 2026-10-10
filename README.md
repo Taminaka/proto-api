@@ -126,7 +126,7 @@ All demo accounts use the password `Admin123!`:
 | R2_ACCOUNT_ID | (empty) | Cloudflare account ID for image storage |
 | R2_ACCESS_KEY_ID | (empty) | R2 access key |
 | R2_SECRET_ACCESS_KEY | (empty) | R2 secret key |
-| R2_BUCKET | (empty) | Shared object storage bucket |
+| R2_BUCKET | `vyde-cdn` | Shared object storage bucket |
 | R2_ENDPOINT | (empty) | R2 S3-compatible endpoint |
 | R2_PUBLIC_URL | `https://cdn.vyde.dev` | Public base URL for uploaded images |
 
