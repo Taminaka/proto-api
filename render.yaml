@@ -40,4 +40,4 @@ services:
       - key: R2_ENDPOINT
         sync: false
       - key: R2_PUBLIC_URL
-        sync: false
+        value: https://cdn.vyde.dev

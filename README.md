@@ -128,7 +128,7 @@ All demo accounts use the password `Admin123!`:
 | R2_SECRET_ACCESS_KEY | (empty) | R2 secret key |
 | R2_BUCKET | (empty) | Shared object storage bucket |
 | R2_ENDPOINT | (empty) | R2 S3-compatible endpoint |
-| R2_PUBLIC_URL | (empty) | Public base URL for uploaded images |
+| R2_PUBLIC_URL | `https://cdn.vyde.dev` | Public base URL for uploaded images |
 
 The authenticated `POST /api/storage/upload` endpoint accepts image files up to
 10 MB and returns a public URL. It accepts the folders `attractions`,
