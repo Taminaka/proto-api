@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: tourism
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tourism}
+    username: ${SPRING_DATASOURCE_USERNAME:tourism}
+    password: ${SPRING_DATASOURCE_PASSWORD:tourism}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    properties:
+      hibernate:
+        format_sql: ${SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL:true}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      mode: never
+logging:
+  level:
+    org.hibernate.SQL: INFO
+    org.hibernate.orm.jdbc.bind: INFO
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+frontend:
+  url: ${FRONTEND_URL:http://localhost:3000}
+
+jwt:
+  secret: ${JWT_SECRET:your-super-secret-jwt-key-min-32-chars-long}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+admin:
+  email: ${ADMIN_EMAIL:admin@tamaka.com}
+  password: ${ADMIN_PASSWORD:Admin123!}
+  full-name: ${ADMIN_FULL_NAME:System Administrator}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method

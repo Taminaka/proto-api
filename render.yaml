@@ -1,0 +1,46 @@
+databases:
+  - name: tamaka-postgres
+    databaseName: tourism
+    user: tourism
+    plan: free
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: tamaka-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/attractions/public
+    plan: free
+    domains:
+      - proto-api.taminaka.com
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tamaka-postgres
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: tamaka-postgres
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: tamaka-postgres
+          property: password
+      - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+        value: update
+      - key: SPRING_JPA_SHOW_SQL
+        value: "false"
+      - key: FRONTEND_URL
+        value: https://proto.taminaka.com
+      - key: JWT_EXPIRATION
+        value: "86400000"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@taminaka.com
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ADMIN_FULL_NAME
+        value: Taminaka Administrator
