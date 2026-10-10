@@ -70,6 +70,31 @@ JWT_SECRET=<long-random-secret>
 The API listens on Render's `PORT` variable and exposes Swagger at
 `https://proto-api.taminaka.com/api/swagger-ui.html`.
 
+#### Supabase production database
+
+Production uses the external Supabase PostgreSQL database; the Docker Compose PostgreSQL
+service is for local development only. In the Render service environment, configure these
+values as secret environment variables:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Supabase shared transaction pooler URL on port `6543`, including `?pgbouncer=true` |
+| `DIRECT_URL` | Supabase direct/session URL on port `5432`, used for maintenance or migrations |
+
+The container converts `postgresql://`/`postgres://` URLs to JDBC automatically. The API
+uses `DATABASE_URL` at runtime and disables PostgreSQL server-side prepared statements
+(`prepareThreshold=0`) for compatibility with Supabase's transaction-mode pooler.
+
+To configure Render:
+
+1. Open the `tamaka-api` service in Render and open **Environment**.
+2. Add `DATABASE_URL` and paste the Supabase pooler URL as a secret.
+3. Add `DIRECT_URL` and paste the Supabase direct URL as a secret.
+4. Set `FRONTEND_URL` to `https://proto.taminaka.com`.
+5. Set a long random `JWT_SECRET`, then redeploy.
+
+Do not put either database URL in Git, `render.yaml`, frontend code, or public logs.
+
 ### Demo data and test accounts
 
 On startup, the application applies the versioned seed migrations in
