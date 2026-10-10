@@ -2,6 +2,10 @@ package com.tamaka.tourism.service;
 
 import com.tamaka.tourism.dto.UploadResponse;
 import com.tamaka.tourism.exception.BusinessException;
+import com.tamaka.tourism.entity.Role;
+import com.tamaka.tourism.entity.User;
+import com.tamaka.tourism.entity.ImageUpload;
+import com.tamaka.tourism.repository.ImageUploadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,10 +16,12 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 
 import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -34,8 +40,14 @@ public class StorageService {
     private String endpoint;
     @Value("${storage.r2.public-url:}")
     private String publicUrl;
+    private final ImageUploadRepository imageUploadRepository;
 
     public UploadResponse upload(MultipartFile file, String folder) {
+        return upload(file, folder, null);
+    }
+
+    public UploadResponse upload(MultipartFile file, String folder, User user) {
+        validateFolder(folder, user);
         if (file == null || file.isEmpty()) {
             throw new BusinessException("File is required");
         }
@@ -71,6 +83,64 @@ public class StorageService {
             throw new BusinessException("Could not upload image");
         }
         return new UploadResponse(key, publicUrl.replaceAll("/$", "") + "/" + key, contentType, file.getSize());
+    }
+
+    public UploadResponse replaceAvatar(User user, MultipartFile file) {
+        LocalDateTime windowStart = LocalDateTime.now().minusHours(24);
+        long changes = imageUploadRepository.countByUserIdAndPurposeAndCreatedAtAfter(
+                user.getId(), "AVATAR", windowStart);
+        if (changes >= 3) {
+            throw new BusinessException("Profile photo limit reached: maximum 3 changes every 24 hours");
+        }
+
+        UploadResponse uploaded = upload(file, "users/" + user.getId() + "/avatar", user);
+        imageUploadRepository.findRecentByUserAndPurpose(
+                        user.getId(), "AVATAR",
+                        org.springframework.data.domain.PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .ifPresent(previous -> delete(previous.getObjectKey()));
+
+        imageUploadRepository.save(ImageUpload.builder()
+                .user(user)
+                .objectKey(uploaded.key())
+                .purpose("AVATAR")
+                .createdAt(LocalDateTime.now())
+                .build());
+        return uploaded;
+    }
+
+    public void delete(String key) {
+        if (key == null || key.isBlank() || accessKeyId.isBlank() || secretAccessKey.isBlank()
+                || bucket.isBlank() || endpoint.isBlank()) {
+            return;
+        }
+        try (S3Client client = client()) {
+            client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(key).build());
+        } catch (RuntimeException ignored) {
+            // A stale object must not prevent the new image from being stored.
+        }
+    }
+
+    private void validateFolder(String folder, User user) {
+        if (user == null) {
+            throw new BusinessException("Authentication is required");
+        }
+        String root = folder == null ? "" : folder.split("/")[0].toLowerCase(Locale.ROOT);
+        boolean allowed = switch (root) {
+            case "users" -> folder.startsWith("users/" + user.getId() + "/");
+            case "attractions" -> hasRole(user, Role.GESTOR, Role.ADMIN);
+            case "commerces", "services" -> hasRole(user, Role.OPERADOR, Role.ADMIN);
+            case "events" -> hasRole(user, Role.GESTOR, Role.OPERADOR, Role.ADMIN);
+            default -> false;
+        };
+        if (!allowed) {
+            throw new BusinessException("You do not have permission to upload to this folder");
+        }
+    }
+
+    private boolean hasRole(User user, Role... roles) {
+        return java.util.Arrays.stream(roles).anyMatch(user.getRoles()::contains);
     }
 
     private S3Client client() {

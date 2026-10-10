@@ -131,9 +131,13 @@ All demo accounts use the password `Admin123!`:
 | R2_PUBLIC_URL | (empty) | Public base URL for uploaded images |
 
 The authenticated `POST /api/storage/upload` endpoint accepts image files up to
-10 MB and returns a public URL. `POST /api/accounts/me/avatar` uses the same
-bucket under `users/{id}/avatar`. In Render, configure the R2 values as secret
-environment variables; do not commit them.
+10 MB and returns a public URL. It accepts the folders `attractions`,
+`commerces`, `services`, and `events`, with role checks applied by the API.
+`POST /api/accounts/me/avatar` uses the same bucket under
+`users/{id}/avatar`. Profile photos are limited to three changes per rolling
+24-hour window; when a replacement succeeds, the previous R2 object is
+deleted. In Render, configure the R2 values as secret environment variables;
+do not commit them.
 
 ## API Endpoints
 

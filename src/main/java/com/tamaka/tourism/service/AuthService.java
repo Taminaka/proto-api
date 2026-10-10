@@ -127,7 +127,7 @@ public class AuthService {
 
     @Transactional
     public String uploadAvatar(User user, MultipartFile file) {
-        return storageService.upload(file, "users/" + user.getId() + "/avatar").url();
+        return storageService.replaceAvatar(user, file).url();
     }
 
     @Transactional

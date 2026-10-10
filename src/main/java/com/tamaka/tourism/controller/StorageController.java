@@ -20,8 +20,8 @@ public class StorageController {
     public ResponseEntity<UploadResponse> upload(
             @AuthenticationPrincipal User user,
             @RequestPart("file") MultipartFile file,
-            @RequestParam(defaultValue = "uploads") String folder
+            @RequestParam String folder
     ) {
-        return ResponseEntity.ok(storageService.upload(file, folder));
+        return ResponseEntity.ok(storageService.upload(file, folder, user));
     }
 }
