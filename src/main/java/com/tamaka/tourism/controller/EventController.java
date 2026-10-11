@@ -20,13 +20,13 @@ public class EventController {
     private final EventService eventService;
 
     @PostMapping("/destination")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<EventResponse> createDestinationEvent(@AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.createDestinationEvent(user, request));
     }
 
     @PostMapping("/commerce")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<EventResponse> createCommerceEvent(@AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.createCommerceEvent(user, request));
     }
@@ -38,26 +38,26 @@ public class EventController {
     }
 
     @PutMapping("/destination/{id}")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<EventResponse> updateDestinationEvent(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.updateDestinationEvent(id, user, request));
     }
 
     @PutMapping("/commerce/{id}")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<EventResponse> updateCommerceEvent(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.updateCommerceEvent(id, user, request));
     }
 
     @PutMapping("/destination/{id}/deactivate")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<Void> deactivateDestinationEvent(@PathVariable Long id, @AuthenticationPrincipal User user) {
         eventService.deactivateDestinationEvent(id, user);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/commerce/{id}/deactivate")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<Void> deactivateCommerceEvent(@PathVariable Long id, @AuthenticationPrincipal User user) {
         eventService.deactivateCommerceEvent(id, user);
         return ResponseEntity.ok().build();

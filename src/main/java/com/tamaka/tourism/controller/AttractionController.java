@@ -19,7 +19,7 @@ public class AttractionController {
     private final AttractionService attractionService;
 
     @PostMapping
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<AttractionResponse> create(@AuthenticationPrincipal User user, @Valid @RequestBody AttractionRequest request) {
         return ResponseEntity.ok(attractionService.create(user, request));
     }
@@ -31,34 +31,34 @@ public class AttractionController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<AttractionResponse> update(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody AttractionRequest request) {
         return ResponseEntity.ok(attractionService.update(id, user, request));
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody AttractionStatusUpdateRequest request) {
         attractionService.updateStatus(id, user, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/occupancy")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<Void> updateOccupancy(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody OccupancyUpdateRequest request) {
         attractionService.updateOccupancy(id, user, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/deactivate")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id, @AuthenticationPrincipal User user) {
         attractionService.deactivate(id, user);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/reactivate")
-    @PreAuthorize("hasRole('GESTOR')")
+    @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<Void> reactivate(@PathVariable Long id, @AuthenticationPrincipal User user) {
         attractionService.reactivate(id, user);
         return ResponseEntity.ok().build();

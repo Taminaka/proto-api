@@ -22,7 +22,7 @@ public class ServiceManager {
 
     @Transactional
     public ServiceResponse create(Long commerceId, User owner, ServiceRequest request) {
-        Commerce commerce = commerceRepository.findByIdAndOwner(commerceId, owner)
+        Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(commerceId) : commerceRepository.findByIdAndOwner(commerceId, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
         Set<Category> categories = getCategories(request.categoryIds());
         com.tamaka.tourism.entity.Service svc = com.tamaka.tourism.entity.Service.builder()
@@ -40,7 +40,7 @@ public class ServiceManager {
     }
 
     public java.util.List<ServiceListResponse> listByCommerce(Long commerceId, User owner) {
-        Commerce commerce = commerceRepository.findByIdAndOwner(commerceId, owner)
+        Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(commerceId) : commerceRepository.findByIdAndOwner(commerceId, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
         return serviceRepository.findByCommerce(commerce).stream().map(this::mapToListResponse).toList();
     }
@@ -56,7 +56,7 @@ public class ServiceManager {
 
     public ServiceResponse getOwnById(Long id, User owner) {
         return serviceRepository.findById(id).map(s -> {
-            if (!s.getCommerce().getOwner().getId().equals(owner.getId())) {
+            if (!owner.getRoles().contains(Role.ADMIN) && !s.getCommerce().getOwner().getId().equals(owner.getId())) {
                 throw new BusinessException("Access denied");
             }
             return mapToResponse(s);
@@ -67,7 +67,7 @@ public class ServiceManager {
     public ServiceResponse update(Long id, User owner, ServiceRequest request) {
         com.tamaka.tourism.entity.Service svc = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-        if (!svc.getCommerce().getOwner().getId().equals(owner.getId())) {
+        if (!owner.getRoles().contains(Role.ADMIN) && !svc.getCommerce().getOwner().getId().equals(owner.getId())) {
             throw new BusinessException("Access denied");
         }
         svc.setName(request.name());
@@ -91,7 +91,7 @@ public class ServiceManager {
     public void delete(Long id, User owner) {
         com.tamaka.tourism.entity.Service svc = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-        if (!svc.getCommerce().getOwner().getId().equals(owner.getId())) {
+        if (!owner.getRoles().contains(Role.ADMIN) && !svc.getCommerce().getOwner().getId().equals(owner.getId())) {
             throw new BusinessException("Access denied");
         }
         serviceRepository.delete(svc);
@@ -101,7 +101,7 @@ public class ServiceManager {
     public void toggleVisibility(Long id, User owner, VisibilityUpdateRequest request) {
         com.tamaka.tourism.entity.Service svc = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
-        if (!svc.getCommerce().getOwner().getId().equals(owner.getId())) {
+        if (!owner.getRoles().contains(Role.ADMIN) && !svc.getCommerce().getOwner().getId().equals(owner.getId())) {
             throw new BusinessException("Access denied");
         }
         svc.setIsVisible(request.visible());

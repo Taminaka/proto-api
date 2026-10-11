@@ -55,13 +55,13 @@ public class CommerceService {
     }
 
     public CommerceResponse getOwnById(Long id, User owner) {
-        return commerceRepository.findByIdAndOwner(id, owner).map(this::mapToResponse)
+        return (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(id) : commerceRepository.findByIdAndOwner(id, owner)).map(this::mapToResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
     }
 
     @Transactional
     public CommerceResponse update(Long id, User owner, CommerceRequest request) {
-        Commerce commerce = commerceRepository.findByIdAndOwner(id, owner)
+        Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(id) : commerceRepository.findByIdAndOwner(id, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
         commerce.setName(request.name());
         commerce.setDescription(request.description());
@@ -86,7 +86,7 @@ public class CommerceService {
 
     @Transactional
     public void updateStatus(Long id, User owner, StatusUpdateRequest request) {
-        Commerce commerce = commerceRepository.findByIdAndOwner(id, owner)
+        Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(id) : commerceRepository.findByIdAndOwner(id, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
         commerce.setStatus(EntityStatus.valueOf(request.status().toUpperCase()));
         commerceRepository.save(commerce);
@@ -102,7 +102,7 @@ public class CommerceService {
 
     @Transactional
     public void deactivateOwn(User owner, Long id) {
-        Commerce commerce = commerceRepository.findByIdAndOwner(id, owner)
+        Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(id) : commerceRepository.findByIdAndOwner(id, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
         commerce.setStatus(EntityStatus.INACTIVE);
         commerceRepository.save(commerce);

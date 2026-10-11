@@ -19,26 +19,26 @@ public class ServiceController {
     private final ServiceManager serviceManager;
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<ServiceResponse> getOwn(@PathVariable Long id, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(serviceManager.getOwnById(id, user));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<ServiceResponse> update(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody ServiceRequest request) {
         return ResponseEntity.ok(serviceManager.update(id, user, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
         serviceManager.delete(id, user);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}/visibility")
-    @PreAuthorize("hasRole('OPERADOR')")
+    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<Void> toggleVisibility(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody VisibilityUpdateRequest request) {
         serviceManager.toggleVisibility(id, user, request);
         return ResponseEntity.ok().build();

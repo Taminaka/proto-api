@@ -54,7 +54,7 @@ public class EventService {
         }
         Commerce commerce = commerceRepository.findById(request.commerceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found"));
-        if (!commerce.getOwner().getId().equals(operator.getId())) {
+        if (!operator.getRoles().contains(Role.ADMIN) && !commerce.getOwner().getId().equals(operator.getId())) {
             throw new BusinessException("Access denied to this commerce");
         }
         Event event = Event.builder()
@@ -107,7 +107,7 @@ public class EventService {
         if (event.getEventType() != EventType.COMERCIO) {
             throw new BusinessException("Not a commerce event");
         }
-        if (event.getCommerce() == null || !event.getCommerce().getOwner().getId().equals(operator.getId())) {
+        if (!operator.getRoles().contains(Role.ADMIN) && (event.getCommerce() == null || !event.getCommerce().getOwner().getId().equals(operator.getId()))) {
             throw new BusinessException("Access denied");
         }
         updateEventFields(event, request);
@@ -132,7 +132,7 @@ public class EventService {
         if (event.getEventType() != EventType.COMERCIO) {
             throw new BusinessException("Not a commerce event");
         }
-        if (event.getCommerce() == null || !event.getCommerce().getOwner().getId().equals(operator.getId())) {
+        if (!operator.getRoles().contains(Role.ADMIN) && (event.getCommerce() == null || !event.getCommerce().getOwner().getId().equals(operator.getId()))) {
             throw new BusinessException("Access denied");
         }
         event.setStatus(EntityStatus.INACTIVE);
