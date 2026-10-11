@@ -51,9 +51,8 @@ public class AccountController {
     }
 
     @PostMapping("/me/operator-mode")
-    public ResponseEntity<Void> enableOperatorMode(@AuthenticationPrincipal User user, @Valid @RequestBody EnableOperatorModeRequest request) {
-        authService.enableOperatorMode(user, request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LoginResponse> enableOperatorMode(@AuthenticationPrincipal User user, @Valid @RequestBody EnableOperatorModeRequest request) {
+        return ResponseEntity.ok(authService.enableOperatorMode(user, request));
     }
 
     @PostMapping("/me/accreditation")
@@ -63,9 +62,8 @@ public class AccountController {
     }
 
     @PutMapping("/me/mode")
-    public ResponseEntity<Void> switchMode(@AuthenticationPrincipal User user, @Valid @RequestBody SwitchModeRequest request) {
-        authService.switchMode(user, request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<LoginResponse> switchMode(@AuthenticationPrincipal User user, @Valid @RequestBody SwitchModeRequest request) {
+        return ResponseEntity.ok(authService.switchMode(user, request));
     }
 
     // Admin endpoints

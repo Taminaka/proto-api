@@ -50,7 +50,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     @Builder.Default
-    private Set<Role> roles = Set.of(Role.TURISTA);
+    private Set<Role> roles = new HashSet<>(Set.of(Role.TURISTA));
 
     @Enumerated(EnumType.STRING)
     @Column(name = "active_mode")

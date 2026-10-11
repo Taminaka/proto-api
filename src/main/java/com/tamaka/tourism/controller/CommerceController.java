@@ -22,13 +22,13 @@ public class CommerceController {
 
     // Operator endpoints
     @PostMapping
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<CommerceResponse> create(@AuthenticationPrincipal User user, @Valid @RequestBody CommerceRequest request) {
         return ResponseEntity.ok(commerceService.create(user, request));
     }
 
     @GetMapping("/mine")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<List<CommerceListResponse>> listOwn(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(commerceService.listOwn(user));
     }
@@ -40,26 +40,26 @@ public class CommerceController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<CommerceResponse> getOwn(@PathVariable Long id, @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(commerceService.getOwnById(id, user));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<CommerceResponse> update(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody CommerceRequest request) {
         return ResponseEntity.ok(commerceService.update(id, user, request));
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<Void> updateStatus(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody StatusUpdateRequest request) {
         commerceService.updateStatus(id, user, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/deactivate")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id, @AuthenticationPrincipal User user) {
         commerceService.deactivateOwn(user, id);
         return ResponseEntity.ok().build();
@@ -67,7 +67,7 @@ public class CommerceController {
 
     // Service endpoints under commerce
     @PostMapping("/{commerceId}/services")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<ServiceResponse> createService(@PathVariable Long commerceId, @AuthenticationPrincipal User user, @Valid @RequestBody ServiceRequest request) {
         return ResponseEntity.ok(serviceManager.create(commerceId, user, request));
     }

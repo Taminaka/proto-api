@@ -26,7 +26,7 @@ public class EventController {
     }
 
     @PostMapping("/commerce")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<EventResponse> createCommerceEvent(@AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.createCommerceEvent(user, request));
     }
@@ -38,7 +38,7 @@ public class EventController {
     }
 
     @GetMapping("/mine")
-    @PreAuthorize("hasAnyRole('GESTOR', 'OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('GESTOR') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<List<EventResponse>> listMine(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(eventService.listOwn(user));
     }
@@ -50,7 +50,7 @@ public class EventController {
     }
 
     @PutMapping("/commerce/{id}")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<EventResponse> updateCommerceEvent(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {
         return ResponseEntity.ok(eventService.updateCommerceEvent(id, user, request));
     }
@@ -63,7 +63,7 @@ public class EventController {
     }
 
     @PutMapping("/commerce/{id}/deactivate")
-    @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('OPERADOR') and principal.activeMode.name() == 'OPERADOR')")
     public ResponseEntity<Void> deactivateCommerceEvent(@PathVariable Long id, @AuthenticationPrincipal User user) {
         eventService.deactivateCommerceEvent(id, user);
         return ResponseEntity.ok().build();

@@ -3,6 +3,7 @@ package com.tamaka.tourism.service;
 import com.tamaka.tourism.dto.UploadResponse;
 import com.tamaka.tourism.exception.BusinessException;
 import com.tamaka.tourism.entity.Role;
+import com.tamaka.tourism.entity.ActiveMode;
 import com.tamaka.tourism.entity.User;
 import com.tamaka.tourism.entity.ImageUpload;
 import com.tamaka.tourism.repository.ImageUploadRepository;
@@ -151,8 +152,9 @@ public class StorageService {
         boolean allowed = switch (root) {
             case "users" -> folder.startsWith("users/" + user.getId() + "/");
             case "attractions" -> hasRole(user, Role.GESTOR, Role.ADMIN);
-            case "commerces", "services" -> hasRole(user, Role.OPERADOR, Role.ADMIN);
-            case "events" -> hasRole(user, Role.GESTOR, Role.OPERADOR, Role.ADMIN);
+            case "commerces", "services" -> isAdmin(user) || isActiveOperator(user);
+            case "events" -> isAdmin(user) || hasRole(user, Role.GESTOR)
+                    || isActiveOperator(user);
             default -> false;
         };
         if (!allowed) {
@@ -162,6 +164,14 @@ public class StorageService {
 
     private boolean hasRole(User user, Role... roles) {
         return java.util.Arrays.stream(roles).anyMatch(user.getRoles()::contains);
+    }
+
+    private boolean isActiveOperator(User user) {
+        return hasRole(user, Role.OPERADOR) && user.getActiveMode() == ActiveMode.OPERADOR;
+    }
+
+    private boolean isAdmin(User user) {
+        return hasRole(user, Role.ADMIN);
     }
 
     private S3Client client() {

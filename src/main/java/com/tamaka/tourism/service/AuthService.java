@@ -37,7 +37,7 @@ public class AuthService {
                 .email(request.email())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .fullName(request.fullName())
-                .roles(java.util.Set.of(Role.TURISTA))
+                .roles(new java.util.HashSet<>(java.util.Set.of(Role.TURISTA)))
                 .activeMode(ActiveMode.TURISTA)
                 .status(UserStatus.ACTIVE)
                 .isVerified(false)
@@ -138,7 +138,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void enableOperatorMode(User user, EnableOperatorModeRequest request) {
+    public LoginResponse enableOperatorMode(User user, EnableOperatorModeRequest request) {
         if (user.getRoles().contains(Role.OPERADOR)) {
             throw new BusinessException("Already an operator");
         }
@@ -158,6 +158,7 @@ public class AuthService {
         user.setActiveMode(ActiveMode.OPERADOR);
         userRepository.save(user);
         logRoleChange(user, Role.OPERADOR, "ADDED", user);
+        return createLoginResponse(user);
     }
 
     @Transactional
@@ -170,13 +171,20 @@ public class AuthService {
     }
 
     @Transactional
-    public void switchMode(User user, SwitchModeRequest request) {
+    public LoginResponse switchMode(User user, SwitchModeRequest request) {
         ActiveMode mode = ActiveMode.valueOf(request.mode().toUpperCase());
         if (mode == ActiveMode.OPERADOR && !user.getRoles().contains(Role.OPERADOR)) {
             throw new BusinessException("Operator mode not enabled");
         }
         user.setActiveMode(mode);
         userRepository.save(user);
+        return createLoginResponse(user);
+    }
+
+    private LoginResponse createLoginResponse(User user) {
+        var roles = user.getRoles().stream().map(Enum::name).collect(Collectors.toSet());
+        String token = jwtUtil.generateToken(user.getEmail(), roles, user.getActiveMode().name());
+        return new LoginResponse(token, user.getEmail(), user.getFullName(), roles, user.getActiveMode().name());
     }
 
     // Admin methods
