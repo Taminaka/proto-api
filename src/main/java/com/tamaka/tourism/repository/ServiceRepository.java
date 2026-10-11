@@ -25,4 +25,5 @@ public interface ServiceRepository extends JpaRepository<Service, Long> {
     List<Service> findActiveFiltered(@Param("name") String name, @Param("categoryId") Long categoryId, @Param("commerceId") Long commerceId);
 
     Optional<Service> findByIdAndCommerce(Long id, Commerce commerce);
+    long countByCommerce(Commerce commerce);
 }

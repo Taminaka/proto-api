@@ -42,6 +42,8 @@ public class StorageService {
     private String endpoint;
     @Value("${storage.r2.public-url:}")
     private String publicUrl;
+    @Value("${limits.images-per-user-per-day:50}")
+    private int imageLimit;
     private final ImageUploadRepository imageUploadRepository;
 
     public UploadResponse upload(MultipartFile file, String folder) {
@@ -62,6 +64,11 @@ public class StorageService {
         }
         if (accessKeyId.isBlank() || secretAccessKey.isBlank() || bucket.isBlank() || endpoint.isBlank() || publicUrl.isBlank()) {
             throw new BusinessException("Image storage is not configured");
+        }
+        if (user != null && !user.getRoles().contains(Role.ADMIN)
+                && imageUploadRepository.countByUserIdAndPurposeAndCreatedAtAfter(
+                user.getId(), "CONTENT", LocalDateTime.now().minusHours(24)) >= imageLimit) {
+            throw new BusinessException("Image upload limit reached: maximum " + imageLimit + " images every 24 hours");
         }
 
         String safeFolder = folder == null || folder.isBlank() ? "uploads" : folder
@@ -91,6 +98,10 @@ public class StorageService {
             log.error("R2 upload failed: type={}, message={}",
                     error.getClass().getSimpleName(), error.getMessage());
             throw new BusinessException("Could not upload image");
+        }
+        if (user != null) {
+            imageUploadRepository.save(ImageUpload.builder()
+                    .user(user).objectKey(key).purpose("CONTENT").createdAt(LocalDateTime.now()).build());
         }
         return new UploadResponse(key, publicUrl.replaceAll("/$", "") + "/" + key, contentType, file.getSize());
     }

@@ -18,6 +18,12 @@ import java.util.List;
 public class ServiceController {
     private final ServiceManager serviceManager;
 
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ServiceListResponse>> listAllForAdmin() {
+        return ResponseEntity.ok(serviceManager.listAllForAdmin());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<ServiceResponse> getOwn(@PathVariable Long id, @AuthenticationPrincipal User user) {

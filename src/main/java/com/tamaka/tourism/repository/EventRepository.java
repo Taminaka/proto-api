@@ -5,6 +5,7 @@ import com.tamaka.tourism.entity.EntityStatus;
 import com.tamaka.tourism.entity.EventType;
 import com.tamaka.tourism.entity.Commerce;
 import com.tamaka.tourism.entity.Attraction;
+import com.tamaka.tourism.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +23,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByAttraction(Attraction attraction);
 
     List<Event> findByCommerce(Commerce commerce);
+    long countByCreatedBy(User user);
+    List<Event> findByCreatedBy(User user);
 
     @Query("SELECT e FROM Event e WHERE e.status = com.tamaka.tourism.entity.EntityStatus.ACTIVE " +
            "AND e.endDate > :now " +

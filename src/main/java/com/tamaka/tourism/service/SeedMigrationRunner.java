@@ -18,7 +18,8 @@ import java.nio.charset.StandardCharsets;
 public class SeedMigrationRunner implements CommandLineRunner {
     private static final String[] MIGRATIONS = {
             "V1__santa_marta_tourism_seed",
-            "V2__taminaka_admin_account"
+            "V2__taminaka_admin_account",
+            "V3__seed_public_images"
     };
 
     private final JdbcTemplate jdbcTemplate;

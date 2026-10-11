@@ -60,3 +60,12 @@ storage:
     bucket: ${R2_BUCKET:${IDENTITY_R2_BUCKET:}}
     endpoint: ${R2_ENDPOINT:${IDENTITY_R2_ENDPOINT:}}
     public-url: ${R2_PUBLIC_URL:${IDENTITY_PHOTO_BASE_URL:}}
+
+limits:
+  images-per-user-per-day: ${IMAGE_UPLOAD_LIMIT_PER_DAY:50}
+  gestor:
+    attractions: ${GESTOR_ATTRACTION_LIMIT:20}
+    events: ${GESTOR_EVENT_LIMIT:20}
+  operator:
+    commerces: ${OPERATOR_COMMERCE_LIMIT:3}
+    services-per-commerce: ${OPERATOR_SERVICE_LIMIT:15}

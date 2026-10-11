@@ -8,6 +8,7 @@ import com.tamaka.tourism.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,9 +20,15 @@ public class EventService {
     private final EventRepository eventRepository;
     private final AttractionRepository attractionRepository;
     private final CommerceRepository commerceRepository;
+    @Value("${limits.gestor.events:20}")
+    private int eventLimit;
 
     @Transactional
     public EventResponse createDestinationEvent(User gestor, EventRequest request) {
+        if (request.images() != null && request.images().size() > 6) throw new BusinessException("Maximum 6 images per event");
+        if (!gestor.getRoles().contains(Role.ADMIN) && eventRepository.countByCreatedBy(gestor) >= eventLimit) {
+            throw new BusinessException("Event limit reached: maximum " + eventLimit + " per gestor");
+        }
         if (request.eventType() != EventType.DESTINO) {
             throw new BusinessException("Invalid event type for destination event");
         }
@@ -49,6 +56,10 @@ public class EventService {
 
     @Transactional
     public EventResponse createCommerceEvent(User operator, EventRequest request) {
+        if (request.images() != null && request.images().size() > 6) throw new BusinessException("Maximum 6 images per event");
+        if (!operator.getRoles().contains(Role.ADMIN) && eventRepository.countByCreatedBy(operator) >= eventLimit) {
+            throw new BusinessException("Event limit reached: maximum " + eventLimit + " per operator");
+        }
         if (request.eventType() != EventType.COMERCIO) {
             throw new BusinessException("Invalid event type for commerce event");
         }
@@ -82,6 +93,10 @@ public class EventService {
 
     public java.util.List<EventResponse> listAllForAdmin() {
         return eventRepository.findAll().stream().map(this::mapToResponse).toList();
+    }
+
+    public List<EventResponse> listOwn(User user) {
+        return eventRepository.findByCreatedBy(user).stream().map(this::mapToResponse).toList();
     }
 
     public EventResponse getById(Long id) {

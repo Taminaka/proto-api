@@ -8,6 +8,7 @@ import com.tamaka.tourism.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Set;
@@ -19,11 +20,18 @@ public class ServiceManager {
     private final ServiceRepository serviceRepository;
     private final CommerceRepository commerceRepository;
     private final CategoryRepository categoryRepository;
+    @Value("${limits.operator.services-per-commerce:15}")
+    private int serviceLimit;
 
     @Transactional
     public ServiceResponse create(Long commerceId, User owner, ServiceRequest request) {
+        if (request.images() != null && request.images().size() > 6) throw new BusinessException("Maximum 6 images per service");
+        if (request.categoryIds() != null && request.categoryIds().size() > 5) throw new BusinessException("Maximum 5 categories per service");
         Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(commerceId) : commerceRepository.findByIdAndOwner(commerceId, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
+        if (!owner.getRoles().contains(Role.ADMIN) && serviceRepository.countByCommerce(commerce) >= serviceLimit) {
+            throw new BusinessException("Service limit reached: maximum " + serviceLimit + " per commerce");
+        }
         Set<Category> categories = getCategories(request.categoryIds());
         com.tamaka.tourism.entity.Service svc = com.tamaka.tourism.entity.Service.builder()
                 .name(request.name())
@@ -43,6 +51,10 @@ public class ServiceManager {
         Commerce commerce = (owner.getRoles().contains(Role.ADMIN) ? commerceRepository.findById(commerceId) : commerceRepository.findByIdAndOwner(commerceId, owner))
                 .orElseThrow(() -> new ResourceNotFoundException("Commerce not found or access denied"));
         return serviceRepository.findByCommerce(commerce).stream().map(this::mapToListResponse).toList();
+    }
+
+    public java.util.List<ServiceListResponse> listAllForAdmin() {
+        return serviceRepository.findAll().stream().map(this::mapToListResponse).toList();
     }
 
     public java.util.List<ServiceListResponse> listActivePublic(String name, Long categoryId, Long commerceId) {

@@ -37,6 +37,12 @@ public class EventController {
         return ResponseEntity.ok(eventService.listAllForAdmin());
     }
 
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('GESTOR', 'OPERADOR', 'ADMIN')")
+    public ResponseEntity<List<EventResponse>> listMine(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(eventService.listOwn(user));
+    }
+
     @PutMapping("/destination/{id}")
     @PreAuthorize("hasAnyRole('GESTOR', 'ADMIN')")
     public ResponseEntity<EventResponse> updateDestinationEvent(@PathVariable Long id, @AuthenticationPrincipal User user, @Valid @RequestBody EventRequest request) {

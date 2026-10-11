@@ -8,6 +8,7 @@ import com.tamaka.tourism.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Set;
@@ -19,9 +20,16 @@ public class AttractionService {
     private final AttractionRepository attractionRepository;
     private final CategoryRepository categoryRepository;
     private final ServiceRepository serviceRepository;
+    @Value("${limits.gestor.attractions:20}")
+    private int attractionLimit;
 
     @Transactional
     public AttractionResponse create(User gestor, AttractionRequest request) {
+        validateRequestSize(request.images(), request.categoryIds());
+        if (!gestor.getRoles().contains(Role.ADMIN) && attractionRepository.countByCreatedBy(gestor) >= attractionLimit) {
+            throw new BusinessException("Attraction limit reached: maximum " + attractionLimit + " per gestor");
+        }
+
         Set<Category> categories = getCategories(request.categoryIds());
         com.tamaka.tourism.entity.Service svc = null;
         if (request.serviceId() != null) {
@@ -45,6 +53,11 @@ public class AttractionService {
                 .createdBy(gestor)
                 .build();
         return mapToResponse(attractionRepository.save(attraction));
+    }
+
+    private void validateRequestSize(List<String> images, Set<Long> categoryIds) {
+        if (images != null && images.size() > 6) throw new BusinessException("Maximum 6 images per attraction");
+        if (categoryIds != null && categoryIds.size() > 5) throw new BusinessException("Maximum 5 categories per attraction");
     }
 
     public java.util.List<AttractionListResponse> listActivePublic(String name, Long categoryId) {

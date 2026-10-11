@@ -33,6 +33,12 @@ public class CommerceController {
         return ResponseEntity.ok(commerceService.listOwn(user));
     }
 
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CommerceListResponse>> listAllForAdmin() {
+        return ResponseEntity.ok(commerceService.listAllForAdmin());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('OPERADOR', 'ADMIN')")
     public ResponseEntity<CommerceResponse> getOwn(@PathVariable Long id, @AuthenticationPrincipal User user) {

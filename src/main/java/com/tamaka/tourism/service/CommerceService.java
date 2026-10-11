@@ -8,6 +8,7 @@ import com.tamaka.tourism.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Set;
@@ -19,9 +20,16 @@ public class CommerceService {
     private final CommerceRepository commerceRepository;
     private final CategoryRepository categoryRepository;
     private final ServiceRepository serviceRepository;
+    @Value("${limits.operator.commerces:3}")
+    private int commerceLimit;
 
     @Transactional
     public CommerceResponse create(User owner, CommerceRequest request) {
+        if (request.images() != null && request.images().size() > 6) throw new BusinessException("Maximum 6 images per commerce");
+        if (request.categoryIds() != null && request.categoryIds().size() > 5) throw new BusinessException("Maximum 5 categories per commerce");
+        if (!owner.getRoles().contains(Role.ADMIN) && commerceRepository.countByOwner(owner) >= commerceLimit) {
+            throw new BusinessException("Commerce limit reached: maximum " + commerceLimit + " per operator");
+        }
         Set<Category> categories = getCategories(request.categoryIds());
         Commerce commerce = Commerce.builder()
                 .name(request.name())
@@ -43,6 +51,10 @@ public class CommerceService {
 
     public java.util.List<CommerceListResponse> listOwn(User owner) {
         return commerceRepository.findByOwner(owner).stream().map(this::mapToListResponse).toList();
+    }
+
+    public java.util.List<CommerceListResponse> listAllForAdmin() {
+        return commerceRepository.findAll().stream().map(this::mapToListResponse).toList();
     }
 
     public java.util.List<CommerceListResponse> listActivePublic(String name, Long categoryId) {

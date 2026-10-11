@@ -18,6 +18,7 @@ public interface CommerceRepository extends JpaRepository<Commerce, Long> {
     List<Commerce> findByStatus(EntityStatus status);
 
     List<Commerce> findByOwnerAndStatus(User owner, EntityStatus status);
+    long countByOwner(User owner);
 
     @Query("SELECT c FROM Commerce c WHERE c.status = com.tamaka.tourism.entity.EntityStatus.ACTIVE " +
            "AND (:name IS NULL OR c.name LIKE CONCAT('%', :name, '%')) " +
