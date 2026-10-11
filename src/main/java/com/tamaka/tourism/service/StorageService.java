@@ -17,6 +17,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.io.IOException;
 import java.net.URI;
@@ -27,6 +28,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class StorageService {
     @Value("${storage.r2.account-id:}")
     private String accountId;
@@ -79,7 +81,15 @@ public class StorageService {
                             .build(),
                     RequestBody.fromBytes(file.getBytes())
             );
+        } catch (S3Exception error) {
+            log.error("R2 upload failed: status={}, code={}, message={}",
+                    error.statusCode(),
+                    error.awsErrorDetails() == null ? "unknown" : error.awsErrorDetails().errorCode(),
+                    error.awsErrorDetails() == null ? "unknown" : error.awsErrorDetails().errorMessage());
+            throw new BusinessException("Could not upload image");
         } catch (IOException | RuntimeException error) {
+            log.error("R2 upload failed: type={}, message={}",
+                    error.getClass().getSimpleName(), error.getMessage());
             throw new BusinessException("Could not upload image");
         }
         return new UploadResponse(key, publicUrl.replaceAll("/$", "") + "/" + key, contentType, file.getSize());
